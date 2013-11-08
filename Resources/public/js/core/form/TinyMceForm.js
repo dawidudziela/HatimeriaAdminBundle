@@ -1,11 +1,11 @@
 /**
  * TinyMCE Form
- * 
+ *
  * @class HatimeriaAdmin.core.form.TinyMceForm
  * @extends Ext.form.Panel
  */
 (function() {
-    
+
     Ext.define('HatimeriaAdmin.core.form.TinyMceForm', {
         extend: 'Hatimeria.core.form.BaseForm',
         alias: 'widget.hatimeria-tinymce',
@@ -19,41 +19,47 @@
 
         /**
          * Config set
-         * 
+         *
          * @cfg {String} tinyConfigSet
          */
         tinyConfigSet: 'extended',
-        
+
         /**
          * Initial value for field
-         * 
+         *
          * @cfg {String} value
          */
         value: null,
-        
+
+        /**
+         * default validate function
+         *
+         */
+        validateFnc: false,
+
         /**
          * @cfg {String} fieldLabel Treść
          */
         fieldLabel: 'Treść',
-        
+
         /**
          * @cfg {String} fieldName
          */
         fieldName: 'description',
-        
+
         /**
          * @cfg {Number} tinyWidth
          */
         width: 500,
-        
+
         /**
          * @cfg {Number} tinyHeight
          */
         height: 350,
-        
+
         /**
          * Margin corrects width of tinyMCE
-         * 
+         *
          * @cfg {Number} marginOffset
          */
         marginOffset: 5,
@@ -62,49 +68,49 @@
          * @cfg {Integer} labelWidth
          */
         labelWidth: 100,
-        
+
         /**
          * @cfg {Integer} labelWidth
          */
         labelAlign: 'left',
-        
+
         /**
          * Max text plain length
          * @cfg {Number} maxLength
          */
         maxLength: false,
-        
+
         /**
          * Allow field blank before submit
-         * 
+         *
          * @cfg {Boolean} allowBlank
          */
         allowBlank: true,
-        
+
         /**
          * Instance of embeded editor (appears after editor created)
          * @property {TinyMCE.Editor} editor
          * @private
          */
         editor: undefined,
-        
+
         /**
          * Length of plain content
          * @property {Number} numChars
          * @private
          */
         numChars: 0,
-        
+
         /**
          * Id of element
          * @property {String}
          * @private
          */
         elId: undefined,
-        
+
         /**
          * Base config
-         * 
+         *
          * @cfg {Object} tinyBaseConfig
          */
         tinyBaseConfig: {
@@ -120,10 +126,10 @@
             theme_advanced_font_sizes: 'x-small=0.8em,small=0.9em,NORMAL=1em,large=1.1em,x-large=1.2em,xx-large=1.4em',
             theme_advanced_blockformats: 'p,h2,h3,h4'
         },
-        
+
         /**
          * Defauly config sets
-         * 
+         *
          * @cfg {Object} tinyConfigSets
          */
         tinyConfigSets: {
@@ -142,22 +148,22 @@
                 theme_advanced_buttons4 : ""
             }
         },
-        
+
         statics: {
             testMe: function() {
                 var panel = Ext.create("Hatimeria.core.form.BaseForm", {
                     renderTo: Ext.getBody(),
                     dockedItems: [{
-                       dock: 'bottom',
-                       xtype: 'toolbar',
-                       items: [
-                           {
+                        dock: 'bottom',
+                        xtype: 'toolbar',
+                        items: [
+                            {
                                 text: 'Submit',
                                 handler: function() {
                                     console.log(panel.getForm().isValid());
                                 }
-                           }
-                       ]
+                            }
+                        ]
                     }],
                     items: [
                         Ext.create("HatimeriaAdmin.core.form.TinyMceForm", {
@@ -170,16 +176,16 @@
                             fieldLabel: 'Numer',
                             name: 'test',
                             allowBlank: false
-                        }                        
+                        }
                     ],
                     height: 1000,
                     width: 800
                 });
-                
+
                 panel.getForm().isValid();
             }
         },
-        
+
         /**
          * Initialization
          */
@@ -207,38 +213,44 @@
                                 _this.fireEvent('tinychange', _this, _this.getEditor())
                             }
                         },
-                        validator: function() {
-                            if (_this.maxLength && _this.getNumChars() > _this.maxLength)
-                            {
-                                return "Opis jest zbyt długi!";
-                            }
-                            
-                            return true;
+                        validator: function(field) {
+                           if (_this.validateFnc != false) {
+                               var msg = _this.validateFnc(field);
+                               if (msg != true) {
+                                   return msg;
+                               }
+                           }
+                           if (_this.maxLength && _this.getNumChars() > _this.maxLength)
+                           {
+                               return "Opis jest zbyt długi!";
+                           }
+
+                               return true;
                         }
                     }
                 ]
             };
-            
+
             this.addEvents(
                 /**
                  * @event tinycreated
                  */
-                'tinycreated', 
-                
+                'tinycreated',
+
                 /**
                  * @event tinychange
                  */
-                'tinychange', 
-                
+                'tinychange',
+
                 /**
                  * @event tinykeydown
                  */
                 'tinykeydown'
             );
-            
+
             Ext.apply(this, Ext.apply(config, this.initialConfig));
             this.callParent();
-            
+
             this.on('afterrender', function() {
                 var tiny = this.getComponent('tinymce');
                 tiny.on('editorcreated', function() {
@@ -251,7 +263,7 @@
                     }, 300);
                 });
             });
-            
+
             // set initial value after tiny is rendered
             if(this.value) {
                 this.on('tinycreated', function(panel, field) {
@@ -259,28 +271,28 @@
                 });
             }
         },
-        
+
         /**
          * Initializes editor
-         * 
+         *
          * @private
          */
         initEditor: function()
         {
             var editor = this.items.get(0).ed;
             var _this = this;
-            
+
             editor.onKeyDown.add(function(ed, e) {
                 _this.countChars();
                 _this.fireEvent('tinykeydown', _this, ed);
             });
-            
+
             this.editor = editor;
         },
-        
+
         /**
          * Config
-         * 
+         *
          * @return {Object}
          */
         getTinyConfig: function()
@@ -294,12 +306,12 @@
             {
                 set = this.tinyConfigSets['basic'];
             }
-            
+
             Ext.apply(set, this.tinyBaseConfig);
-            
+
             return set;
         },
-        
+
         /**
          * Get dynamic height of tiny
          */
@@ -307,62 +319,62 @@
         {
             return this.height - 40;
         },
-        
+
         /**
          * Return embeded editor
-         * 
+         *
          * @return TinyMCE.Editor
          */
         getEditor: function()
         {
             return this.editor;
         },
-        
+
         /**
          * Element of main id container
-         * 
+         *
          * @return {String}
          */
         getElId: function()
         {
             return this.elId;
         },
-        
+
         /**
          * HTML content
-         * 
+         *
          * @return {String}
          */
         getTinyContent: function()
         {
             return this.getEditor().getContent();
         },
-        
+
         /**
          * Plaint text content
-         * 
+         *
          * @return {String}
          */
         getTinyPlainContent: function()
         {
             var content = this.getTinyContent();
-            
+
             return content.replace(/(<([^>]+)>)/ig, "").replace(/&[a-z0-9]+;/ig, " ");
         },
-        
+
         /**
          * Counts chars
-         * 
+         *
          * @private
          */
         countChars: function()
         {
             this.numChars = this.getTinyPlainContent().length;
         },
-        
+
         /**
          * Number of chars
-         * 
+         *
          * @return {Number}
          */
         getNumChars: function()
@@ -370,5 +382,5 @@
             return this.numChars;
         }
     });
-    
+
 })();
