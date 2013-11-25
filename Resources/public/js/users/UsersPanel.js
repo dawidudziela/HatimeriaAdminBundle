@@ -11,7 +11,9 @@
         },
         constructor: function(cfg)
         {
-            var store = Ext.create('HatimeriaAdmin.users.store.UserStore');
+            var store = Ext.create('HatimeriaAdmin.users.store.UserStore', {
+                pageSize: 15
+            });
             var config = {
                 title: this.__('title'),
                 id: 'users-grid',
