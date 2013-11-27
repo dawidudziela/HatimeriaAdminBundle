@@ -12,7 +12,7 @@
         constructor: function(cfg)
         {
             var store = Ext.create('HatimeriaAdmin.users.store.UserStore', {
-                pageSize: 15
+                pageSize: 10
             });
             var config = {
                 title: this.__('title'),
